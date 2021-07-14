@@ -7,7 +7,7 @@ local await = a.await
 
 local async_static_finder = require('telescope.finders.async_static_finder')
 local async_oneshot_finder = require('telescope.finders.async_oneshot_finder')
--- local async_job_finder = require('telescope.finders.async_job_finder')
+local async_job_finder = require('telescope.finders.async_job_finder')
 
 local finders = {}
 
@@ -149,32 +149,32 @@ finders._new = function(opts)
 end
 
 finders.new_job = function(command_generator, entry_maker, maximum_results, cwd)
-  -- return async_job_finder {
-  --   command_generator = command_generator,
-  --   entry_maker = entry_maker,
-  --   maximum_results = maximum_results,
-  --   cwd = cwd,
-  -- }
-
-  return JobFinder:new {
-    fn_command = function(_, prompt)
-      local command_list = command_generator(prompt)
-      if command_list == nil then
-        return nil
-      end
-
-      local command = table.remove(command_list, 1)
-
-      return {
-        command = command,
-        args = command_list,
-      }
-    end,
-
+  return async_job_finder {
+    command_generator = command_generator,
     entry_maker = entry_maker,
     maximum_results = maximum_results,
     cwd = cwd,
   }
+
+  -- return async_job_finder {
+  --   fn_command = function(_, prompt)
+  --     local command_list = command_generator(prompt)
+  --     if command_list == nil then
+  --       return nil
+  --     end
+
+  --     local command = table.remove(command_list, 1)
+
+  --     return {
+  --       command = command,
+  --       args = command_list,
+  --     }
+  --   end,
+
+  --   entry_maker = entry_maker,
+  --   maximum_results = maximum_results,
+  --   cwd = cwd,
+  -- }
 end
 
 --- One shot job

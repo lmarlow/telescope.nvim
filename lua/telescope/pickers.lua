@@ -1,12 +1,11 @@
 local a = vim.api
 local popup = require('popup')
 
-local async_lib = require('plenary.async_lib')
-local async_util = async_lib.util
+local async = require('plenary.async')
+local async_util = async.util
 
-local async = async_lib.async
-local await = async_lib.await
-local channel = async_util.channel
+local channel = require('plenary.async.control').channel
+local await_schedule = async_util.scheduler
 
 require('telescope')
 
@@ -365,11 +364,11 @@ function Picker:find()
   local tx, rx = channel.mpsc()
   self.__on_lines = tx.send
 
-  local main_loop = async(function()
+  local main_loop = async.void(function()
     while true do
-      await(async_lib.scheduler())
+      await_schedule()
 
-      local _, _, _, first_line, last_line = await(rx.last())
+      local _, _, _, first_line, last_line = rx.last()
       self:_reset_track()
 
       if not vim.api.nvim_buf_is_valid(prompt_bufnr) then
@@ -433,7 +432,7 @@ function Picker:find()
   })
 
   if self.sorter then self.sorter:_init() end
-  async_lib.run(main_loop())
+  main_loop()
   status_updater()
 
   -- TODO: Use WinLeave as well?
